@@ -63,7 +63,7 @@ Authenticate and receive a JWT.
   "user": {
     "id": "665f1c2e8a1b2c3d4e5f6789",
     "email": "analyst@loopr.ai",
-    "name": "Namrata Shirdhankar",
+    "name": "Saumya Gupta",
     "avatar": "https://i.pravatar.cc/120?img=47"
   }
 }
