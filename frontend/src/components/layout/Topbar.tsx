@@ -1,6 +1,6 @@
 import { Box, InputBase, Avatar, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/useAuth';
 
 interface TopbarProps {
   search: string;

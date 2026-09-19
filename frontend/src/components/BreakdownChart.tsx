@@ -39,6 +39,15 @@ export function BreakdownChart({ breakdown }: { breakdown: Breakdown | null }) {
       {!data.length && (
         <Box sx={{ textAlign: 'center', mt: -20, opacity: 0.5 }}>No data</Box>
       )}
+      {!!breakdown?.byStatus.length && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 1 }}>
+          {breakdown.byStatus.map((s) => (
+            <Typography key={s.name} variant="caption" sx={{ opacity: 0.7 }}>
+              {s.name}: ${s.total.toFixed(2)} ({s.count})
+            </Typography>
+          ))}
+        </Box>
+      )}
     </Paper>
   );
 }

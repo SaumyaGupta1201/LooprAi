@@ -19,9 +19,14 @@ app.use(express.json({ limit: "1mb" }));
 
 app.use(
   "/api",
-  rateLimit({ windowMs: 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false })
+  rateLimit({
+    windowMs: 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "Too many requests. Please try again shortly." },
+  })
 );
-
 app.get("/health", (_req, res) => res.json({ status: "ok", time: new Date() }));
 app.use("/api", routes);
 

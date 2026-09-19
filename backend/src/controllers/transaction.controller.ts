@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import { Transaction } from "../models/Transaction";
 import { Member } from "../models/Member";
-import { buildBasePipeline, buildSort, TxnQuery } from "../services/query.service";
-import { asyncHandler } from "../utils/ApiError";
+import { buildBasePipeline, buildSort, txnQuerySchema, TxnQuery } from "../services/query.service";
+import { ApiError, asyncHandler } from "../utils/ApiError";
 
 export const listTransactions = asyncHandler(async (req: Request, res: Response) => {
-  const q = req.query as unknown as TxnQuery & {
-    page?: string; limit?: string; sortBy?: string; order?: string;
-  };
+  const parsed = txnQuerySchema.safeParse(req.query);
+  if (!parsed.success) throw new ApiError(400, parsed.error.issues[0].message);
+  const q = parsed.data as TxnQuery & { page?: number; limit?: number; sortBy?: string; order?: string };
 
   const page = Math.max(1, Number(q.page) || 1);
   const limit = Math.min(100, Math.max(1, Number(q.limit) || 10));

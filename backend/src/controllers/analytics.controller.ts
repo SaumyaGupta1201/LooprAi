@@ -1,11 +1,17 @@
 import { Request, Response } from "express";
 import { Transaction } from "../models/Transaction";
-import { buildBasePipeline, TxnQuery } from "../services/query.service";
-import { asyncHandler } from "../utils/ApiError";
+import { buildBasePipeline, txnQuerySchema, TxnQuery } from "../services/query.service";
+import { ApiError, asyncHandler } from "../utils/ApiError";
+
+const parseQuery = (req: Request): TxnQuery => {
+  const parsed = txnQuerySchema.safeParse(req.query);
+  if (!parsed.success) throw new ApiError(400, parsed.error.issues[0].message);
+  return parsed.data;
+};
 
 /** Summary cards: Balance, Revenue, Expenses, Savings. */
 export const getSummary = asyncHandler(async (req: Request, res: Response) => {
-  const pipeline = buildBasePipeline(req.query as unknown as TxnQuery);
+  const pipeline = buildBasePipeline(parseQuery(req));
 
   const rows = await Transaction.aggregate([
     ...pipeline,
@@ -45,29 +51,45 @@ export const getSummary = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-/** Revenue vs Expense trend, grouped monthly. */
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+/** Revenue vs Expense trend, grouped by the requested period (default monthly). */
 export const getTrend = asyncHandler(async (req: Request, res: Response) => {
-  const pipeline = buildBasePipeline(req.query as unknown as TxnQuery);
+  const query = parseQuery(req);
+  const period = query.period || "monthly";
+  const pipeline = buildBasePipeline(query);
+
+  const groupId =
+    period === "weekly"
+      ? { y: { $isoWeekYear: "$date" }, w: { $isoWeek: "$date" }, category: "$category" }
+      : period === "yearly"
+      ? { y: { $year: "$date" }, category: "$category" }
+      : { y: { $year: "$date" }, m: { $month: "$date" }, category: "$category" };
 
   const rows = await Transaction.aggregate([
     ...pipeline,
-    {
-      $group: {
-        _id: { y: { $year: "$date" }, m: { $month: "$date" }, category: "$category" },
-        total: { $sum: "$amount" },
-      },
-    },
-    { $sort: { "_id.y": 1, "_id.m": 1 } },
+    { $group: { _id: groupId, total: { $sum: "$amount" } } },
+    { $sort: { "_id.y": 1, "_id.m": 1, "_id.w": 1 } },
   ]);
 
-  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const bucket = new Map<string, { label: string; revenue: number; expenses: number }>();
 
   for (const r of rows) {
-    const key = `${r._id.y}-${String(r._id.m).padStart(2, "0")}`;
-    if (!bucket.has(key)) {
-      bucket.set(key, { label: `${MONTHS[r._id.m - 1]} ${r._id.y}`, revenue: 0, expenses: 0 });
-    }
+    const key =
+      period === "weekly"
+        ? `${r._id.y}-W${String(r._id.w).padStart(2, "0")}`
+        : period === "yearly"
+        ? `${r._id.y}`
+        : `${r._id.y}-${String(r._id.m).padStart(2, "0")}`;
+
+    const label =
+      period === "weekly"
+        ? `Wk ${r._id.w} '${String(r._id.y).slice(2)}`
+        : period === "yearly"
+        ? `${r._id.y}`
+        : `${MONTHS[r._id.m - 1]} ${r._id.y}`;
+
+    if (!bucket.has(key)) bucket.set(key, { label, revenue: 0, expenses: 0 });
     const entry = bucket.get(key)!;
     if (r._id.category === "Revenue") entry.revenue += r.total;
     else entry.expenses += r.total;
@@ -82,7 +104,7 @@ export const getTrend = asyncHandler(async (req: Request, res: Response) => {
 
 /** Category + status breakdown for the donut / bars. */
 export const getBreakdown = asyncHandler(async (req: Request, res: Response) => {
-  const pipeline = buildBasePipeline(req.query as unknown as TxnQuery);
+  const pipeline = buildBasePipeline(parseQuery(req));
 
   const [byCategory, byStatus, byUser] = await Promise.all([
     Transaction.aggregate([
@@ -116,7 +138,7 @@ export const getBreakdown = asyncHandler(async (req: Request, res: Response) => 
 export const getRecent = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(20, Number(req.query.limit) || 5);
   const rows = await Transaction.aggregate([
-    ...buildBasePipeline({}),
+    ...buildBasePipeline(parseQuery(req)),
     { $sort: { date: -1 } },
     { $limit: limit },
   ]);

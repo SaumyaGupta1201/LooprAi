@@ -1,9 +1,11 @@
-# Loopr Finance — API Documentation
+# Penta — API Documentation
 
 Base URL: `http://localhost:5000/api`
 
 All endpoints except `POST /auth/login` require an `Authorization` header:
+```
 Authorization: Bearer <jwt_token>
+```
 
 
 ## Response Envelope
@@ -82,7 +84,7 @@ Return the currently authenticated account.
 {
   "success": true,
   "user": {
-    "_id": "665f1c2e8a1b2c3d4e5f6789",
+    "id": "665f1c2e8a1b2c3d4e5f6789",
     "email": "analyst@loopr.ai",
     "name": "Namrata Shirdhankar",
     "avatar": "https://i.pravatar.cc/120?img=47"
@@ -133,8 +135,9 @@ Paginated, filtered, sorted, and searchable transaction list.
 
 **Example**
 
+```
 GET /api/transactions?page=1&limit=10&sortBy=date&order=desc&category=Revenue&status=Paid
-
+```
 
 **Response `200`**
 ```json
@@ -187,10 +190,12 @@ category, status, and user dropdowns without hardcoding them client-side.
 
 All analytics endpoints accept the same filter query parameters as
 `GET /transactions` (`search`, `category`, `status`, `user_id`, `startDate`,
-`endDate`, `minAmount`, `maxAmount`), so every chart reflects the currently
-active filters.
+`endDate`, `minAmount`, `maxAmount`), so every chart — including "Recent
+Transactions" — reflects the currently active filters.
 
 ### `GET /analytics/summary`
+
+**Auth required:** Yes
 
 **Response `200`**
 ```json
@@ -211,9 +216,30 @@ active filters.
 
 ### `GET /analytics/trend`
 
-Revenue vs. expenses, grouped by month.
+Revenue vs. expenses over time, bucketed into weekly, monthly, or yearly
+intervals. Powers the Overview chart's period toggle.
+
+**Auth required:** Yes
+
+**Query parameters** (in addition to the shared filters listed above)
+
+| Param    | Type   | Description                                          |
+|----------|--------|-------------------------------------------------------|
+| `period` | string | `weekly` \| `monthly` \| `yearly`. Defaults to `monthly`. |
+
+**Example**
+
+GET /api/analytics/trend?period=weekly&category=Revenue
+
 
 **Response `200`**
+
+Each object in `data` represents one bucket for the selected `period`, sorted
+chronologically. `key` is a stable, sortable identifier for the bucket;
+`label` is the human-readable string used in the chart's X-axis; `net` is
+`revenue - expenses` for that bucket.
+
+`period=monthly` (default) — `key` format `YYYY-MM`:
 ```json
 {
   "success": true,
@@ -223,9 +249,39 @@ Revenue vs. expenses, grouped by month.
 }
 ```
 
+`period=weekly` — `key` format `YYYY-Www` (ISO 8601 week numbering, per
+[`$isoWeek`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/isoWeek/)):
+```json
+{
+  "success": true,
+  "data": [
+    { "key": "2026-W29", "label": "Wk 29 '26", "revenue": 3200, "expenses": 1100, "net": 2100 }
+  ]
+}
+```
+
+`period=yearly` — `key` format `YYYY`:
+```json
+{
+  "success": true,
+  "data": [
+    { "key": "2026", "label": "2026", "revenue": 195302, "expenses": 145803, "net": 49499 }
+  ]
+}
+```
+
+**Notes:**
+- Buckets with no matching transactions are omitted rather than returned with
+  zero values — the frontend renders only the buckets present in the response.
+- `period=weekly` uses ISO week numbering (weeks start Monday, week 1 is the
+  week containing the year's first Thursday), which may place late-December
+  or early-January transactions in a week labeled under the adjacent year.
+
 ### `GET /analytics/breakdown`
 
 Aggregated totals by category, by status, and by user.
+
+**Auth required:** Yes
 
 **Response `200`**
 ```json
@@ -240,6 +296,8 @@ Aggregated totals by category, by status, and by user.
 ```
 
 ### `GET /analytics/recent`
+
+**Auth required:** Yes
 
 **Query parameters:** `limit` (number, default `5`, max `20`)
 
@@ -308,10 +366,11 @@ pipeline as the transaction list.
 
 **Response `200`** — binary CSV stream
 
+```
 Content-Type: text/csv; charset=utf-8
 Content-Disposition: attachment; filename="revenue-report.csv"
 X-Row-Count: 42
-
+```
 
 CSV body (UTF-8 with BOM for Excel compatibility):
 ```csv

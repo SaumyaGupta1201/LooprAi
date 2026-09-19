@@ -32,6 +32,7 @@ export function Dashboard() {
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [trend, setTrend] = useState<TrendPoint[]>([]);
+  const [period, setPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
   const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
   const [exportOpen, setExportOpen] = useState(false);
@@ -59,9 +60,9 @@ export function Dashboard() {
 
   useEffect(() => {
     analyticsApi.getSummary(filters).then((res) => setSummary(res.data.data));
-    analyticsApi.getTrend(filters).then((res) => setTrend(res.data.data));
+    analyticsApi.getTrend({ ...filters, period }).then((res) => setTrend(res.data.data));
     analyticsApi.getBreakdown(filters).then((res) => setBreakdown(res.data.data));
-  }, [category, status, search, userId, startDate, endDate, minAmount, maxAmount]);
+  }, [category, status, search, userId, startDate, endDate, minAmount, maxAmount, period]);
 
   const handleClearFilters = () => {
     setSearch('');
@@ -87,7 +88,7 @@ export function Dashboard() {
       <SummaryCards summary={summary} />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 2, px: 4, mt: 3, mb: 3 }}>
-        <OverviewChart trend={trend} />
+        <OverviewChart trend={trend} period={period} onPeriodChange={setPeriod} />
         <RecentTransactions items={recent} />
       </Box>
 

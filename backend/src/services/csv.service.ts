@@ -23,12 +23,15 @@ const escapeCell = (value: unknown): string => {
   return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 };
 
-const formatCell = (key: string, row: Record<string, unknown>): string => {
-  const raw = row[key];
-  if (key === "date" && raw) return new Date(raw as string).toISOString().split("T")[0];
-  if (key === "amount" && typeof raw === "number") return raw.toFixed(2);
-  return escapeCell(raw);
-};
+  const formatCell = (key: string, row: Record<string, unknown>): string => {
+    const raw = row[key];
+    // A leading zero-width space (invisible, U+200B) breaks Excel's date-pattern
+    // auto-detection so it keeps this column as plain text — avoiding both the
+    // #### column-overflow bug and a visible leading apostrophe in the cell.
+    if (key === "date" && raw) return `\u200B${new Date(raw as string).toISOString().split("T")[0]}`;
+    if (key === "amount" && typeof raw === "number") return escapeCell(raw.toFixed(2));
+    return escapeCell(raw);
+  };
 
 export const generateCsv = (
   rows: Record<string, unknown>[],

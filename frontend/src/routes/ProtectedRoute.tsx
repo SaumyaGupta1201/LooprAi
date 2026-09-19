@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { ReactNode } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/useAuth';
 import { Box, CircularProgress } from '@mui/material';
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {

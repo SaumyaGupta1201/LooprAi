@@ -38,7 +38,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 export const me = asyncHandler(async (req: Request, res: Response) => {
   const account = await Account.findById(req.user?.id);
   if (!account) throw new ApiError(404, "Account no longer exists");
-  res.json({ success: true, user: account });
+  res.json({
+    success: true,
+    user: { id: account._id, email: account.email, name: account.name, avatar: account.avatar },
+  });
 });
 
 // Stateless JWT: the client discards the token. Endpoint exists for a clean flow.

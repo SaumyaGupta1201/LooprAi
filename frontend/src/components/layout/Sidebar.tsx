@@ -1,8 +1,11 @@
-import { Box, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
+import { Box, List, ListItemButton, ListItemIcon, ListItemText, Drawer, AppBar, Toolbar } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/DashboardOutlined';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLongOutlined';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
-import { useAuth } from '../../context/AuthContext';
+import { useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
+import { useAuth } from '../../context/useAuth';
+import pentaLogo from '../../assets/logo.png';
 
 const NAV = [
   { label: 'Dashboard', icon: <DashboardIcon />, id: 'top' },
@@ -11,13 +14,15 @@ const NAV = [
 
 export function Sidebar() {
   const { logout } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const scrollTo = (id: string) => {
     if (id === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMobileOpen(false);
   };
 
-  return (
+  const content = (
     <Box
       sx={{
         width: 240,
@@ -30,10 +35,9 @@ export function Sidebar() {
         borderRight: '1px solid rgba(255,255,255,0.06)',
       }}
     >
-      <Typography variant="h6" sx={{ p: 3, fontWeight: 700 }}>
-        Loopr <Box component="span" sx={{ color: 'primary.main' }}>Finance</Box>
-      </Typography>
-
+      <Box sx={{ p: 3 }}>
+        <img src={pentaLogo} alt="Penta" style={{ height: 28, display: 'block' }} />
+      </Box>
       <List sx={{ px: 1 }}>
         {NAV.map((item, i) => (
           <ListItemButton key={item.label} selected={i === 0} onClick={() => scrollTo(item.id)} sx={{ borderRadius: 2, mb: 0.5 }}>
@@ -58,5 +62,37 @@ export function Sidebar() {
         <ListItemText primary="Logout" />
       </ListItemButton>
     </Box>
+  );
+
+  return (
+    <>
+      <AppBar
+        position="fixed"
+        sx={{ display: { xs: 'flex', md: 'none' }, bgcolor: 'background.paper', boxShadow: 'none' }}
+      >
+        <Toolbar>
+          <Box onClick={() => setMobileOpen(true)} sx={{ cursor: 'pointer' }}>
+            <MenuIcon />
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Drawer
+        variant="permanent"
+        sx={{ display: { xs: 'none', md: 'block' }, '& .MuiDrawer-paper': { width: 240, boxSizing: 'border-box' } }}
+        open
+      >
+        {content}
+      </Drawer>
+
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        sx={{ display: { xs: 'block', md: 'none' }, '& .MuiDrawer-paper': { width: 240 } }}
+      >
+        {content}
+      </Drawer>
+    </>
   );
 }

@@ -1,4 +1,21 @@
 import { PipelineStage } from "mongoose";
+import { z } from "zod";
+
+export const txnQuerySchema = z.object({
+  page: z.coerce.number().int().positive().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  sortBy: z.enum(["date", "amount", "category", "status", "userName", "txnId"]).optional(),
+  period: z.enum(["weekly", "monthly", "yearly"]).optional(),
+  order: z.enum(["asc", "desc"]).optional(),
+  search: z.string().max(200).optional(),
+  category: z.string().optional(),
+  status: z.string().optional(),
+  user_id: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  minAmount: z.coerce.number().optional(),
+  maxAmount: z.coerce.number().optional(),
+});
 
 export interface TxnQuery {
   search?: string;
@@ -7,8 +24,9 @@ export interface TxnQuery {
   user_id?: string;    // comma separated
   startDate?: string;
   endDate?: string;
-  minAmount?: string;
-  maxAmount?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  period?: "weekly" | "monthly" | "yearly";
 }
 
 const splitCsv = (v?: string) =>

@@ -1,4 +1,4 @@
-# Loopr Finance — Financial Analytics Dashboard
+# Penta — Financial Analytics Dashboard
 
 A full-stack financial analytics platform with JWT authentication, interactive
 revenue/expense visualizations, a searchable and filterable transaction table,
@@ -31,7 +31,7 @@ Built for the Loopr AI full-stack technical assignment.
 
 ## Overview
 
-Loopr Finance lets an analyst log in, view a summary of revenue, expenses, and
+Penta lets an analyst log in, view a summary of revenue, expenses, and
 balance, explore trends and category breakdowns on interactive charts, and drill
 into the underlying transactions with multi-field filtering, search, and sorting.
 Any filtered view can be exported to a CSV with a user-chosen set of columns.
@@ -48,11 +48,12 @@ Any filtered view can be exported to a CSV with a user-chosen set of columns.
 | Security       | Helmet, CORS, rate limiting                     |
 
 ## Architecture
-┌─────────────┐ HTTPS/JSON ┌──────────────┐ Mongoose ┌───────────┐
-│ React │ ───────────────────────▶ │ Express │ ─────────────────────▶ │ MongoDB │
-│ (Vite SPA) │ ◀─────────────────────── │ REST API │ ◀───────────────────── │ Atlas │
-└─────────────┘ JWT Bearer token └──────────────┘ └───────────┘
 
+```mermaid
+graph LR
+    A[React SPA<br/>Vite + MUI] -- "HTTPS/JSON<br/>+ JWT Bearer token" --> B[Express REST API<br/>TypeScript]
+    B -- Mongoose --> C[(MongoDB Atlas)]
+```
 
 - The frontend never talks to MongoDB directly — all data access goes through
   the authenticated REST API.
@@ -64,6 +65,8 @@ Any filtered view can be exported to a CSV with a user-chosen set of columns.
   with the same filters.
 
 ## Project Structure
+
+```
 loopr-finance/
 ├── backend/
 │ ├── src/
@@ -89,7 +92,7 @@ loopr-finance/
 │ └── ...
 ├── README.md
 └── API_DOCS.md
-
+```
 
 ## Prerequisites
 
@@ -158,6 +161,9 @@ npm run dev
 
 Open **http://localhost:5173** and log in with the demo credentials below.
 
+> Before submitting/deploying, verify both sides compile cleanly:
+> `cd backend && npm run build` and `cd frontend && npm run build`.
+
 ## Demo Credentials
 
 | Field    | Value                |
@@ -192,7 +198,8 @@ Open **http://localhost:5173** and log in with the demo credentials below.
 - **Authentication** — JWT-based login/logout with protected API routes and a
   protected frontend route guard.
 - **Financial Dashboard** — summary cards (revenue, expenses, balance, savings
-  rate), a revenue-vs-expenses trend chart, and a category breakdown chart.
+  rate), a revenue-vs-expenses trend chart with a weekly/monthly/yearly period
+  toggle, and a category breakdown chart.
 - **Transaction Table** — server-side pagination, column sorting, real-time
   search, and multi-field filters (category, status, user, date range, amount
   range).
@@ -216,13 +223,17 @@ Full endpoint reference, request/response shapes, and error format: see
   and rows in the exported CSV are always in sync with the active filters.
 - **Stateless JWT auth.** No server-side session store; `/auth/logout` exists
   for a clean UX but the client is responsible for discarding the token.
-- **CSV formula-injection protection.** Cell values starting with `=`, `+`,
-  `-`, or `@` are prefixed with a leading `'` before export, to prevent
-  spreadsheet formula injection when the CSV is opened in Excel/Sheets.
+- **CSV export hardening.** Beyond formula-injection protection (cells
+  starting with `=`, `+`, `-`, or `@` are neutralized), the export also
+  writes a UTF-8 BOM so Excel decodes special characters correctly, and
+  inserts a zero-width space before date values so Excel doesn't mangle
+  them via its automatic date-pattern detection.
 
 ## Known Limitations
 
 - No refresh-token rotation — JWTs simply expire after `JWT_EXPIRES_IN` and the
   user is redirected to log in again.
-- No automated test suite yet (unit/integration tests are a natural next step).
+- No automated test suite yet. `query.service.ts` (the shared aggregation
+  pipeline behind the table, analytics, and CSV export) would be the first
+  candidate for unit tests, since every other feature depends on it.
 - Single demo account — no self-service signup or role-based access control.

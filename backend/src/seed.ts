@@ -60,7 +60,7 @@ const run = async () => {
   await Account.create({
     email: process.env.DEMO_EMAIL || "analyst@loopr.ai",
     password: process.env.DEMO_PASSWORD || "Loopr@123",
-    name: "Namrata Shirdhankar",
+    name: "Saumya Gupta",
     avatar: "https://i.pravatar.cc/120?img=47",
   });
 

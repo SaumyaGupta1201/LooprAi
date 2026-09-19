@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Snackbar, Alert, Stack } from '@mui/material';
 import { setErrorHandler } from '../api/client';
 
@@ -12,7 +12,7 @@ interface AlertContextValue {
   showAlert: (message: string, severity?: AlertItem['severity']) => void;
 }
 
-const AlertContext = createContext<AlertContextValue | undefined>(undefined);
+export const AlertContext = createContext<AlertContextValue | undefined>(undefined);
 
 export function AlertProvider({ children }: { children: ReactNode }) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
@@ -52,8 +52,3 @@ export function AlertProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAlert = () => {
-  const ctx = useContext(AlertContext);
-  if (!ctx) throw new Error('useAlert must be used within AlertProvider');
-  return ctx;
-};
