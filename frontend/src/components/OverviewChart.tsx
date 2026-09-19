@@ -31,7 +31,10 @@ export function OverviewChart({ trend, period, onPeriodChange }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
           <XAxis dataKey="label" stroke="rgba(255,255,255,0.4)" fontSize={12} />
           <YAxis stroke="rgba(255,255,255,0.4)" fontSize={12} />
-          <Tooltip contentStyle={{ background: '#161922', border: 'none', borderRadius: 8 }} />
+          <Tooltip
+            contentStyle={{ background: '#161922', border: 'none', borderRadius: 8 }}
+            formatter={(value) => `$${Number(value).toFixed(2)}`}
+          />
           <Legend />
           <Line type="monotone" dataKey="revenue" name="Income" stroke="#22c55e" strokeWidth={2} dot={false} />
           <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} dot={false} />

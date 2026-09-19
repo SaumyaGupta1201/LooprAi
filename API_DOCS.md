@@ -195,6 +195,11 @@ Transactions" — reflects the currently active filters.
 
 ### `GET /analytics/summary`
 
+`revenue`, `expenses`, `balance`, and `savings` are computed from
+**`status: "Paid"` transactions only** — Pending amounts are reported
+separately via `pendingRevenue` / `pendingExpenses` rather than included in
+the headline totals.
+
 **Auth required:** Yes
 
 **Response `200`**
@@ -271,6 +276,9 @@ chronologically. `key` is a stable, sortable identifier for the bucket;
 ```
 
 **Notes:**
+- Like `GET /analytics/summary`, this endpoint only aggregates
+  `status: "Paid"` transactions — Pending amounts are excluded from
+  `revenue`, `expenses`, and `net` in every bucket.
 - Buckets with no matching transactions are omitted rather than returned with
   zero values — the frontend renders only the buckets present in the response.
 - `period=weekly` uses ISO week numbering (weeks start Monday, week 1 is the

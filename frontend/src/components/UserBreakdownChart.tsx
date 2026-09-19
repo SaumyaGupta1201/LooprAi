@@ -6,7 +6,7 @@ export function UserBreakdownChart({ breakdown }: { breakdown: Breakdown | null 
   const data = breakdown?.byUser ?? [];
 
   return (
-    <Paper sx={{ p: 3, height: 360 }}>
+    <Paper sx={{ p: 3, height: 420 }}>
       <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
         Revenue vs Expenses by User
       </Typography>

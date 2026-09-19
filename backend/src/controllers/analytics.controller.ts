@@ -68,6 +68,7 @@ export const getTrend = asyncHandler(async (req: Request, res: Response) => {
 
   const rows = await Transaction.aggregate([
     ...pipeline,
+    { $match: { status: "Paid" } },
     { $group: { _id: groupId, total: { $sum: "$amount" } } },
     { $sort: { "_id.y": 1, "_id.m": 1, "_id.w": 1 } },
   ]);

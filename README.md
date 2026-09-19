@@ -6,6 +6,8 @@ and a configurable CSV export pipeline.
 
 Built for the Loopr AI full-stack technical assignment.
 
+**Live Demo:** [https://loopraiassignment.onrender.com](https://loopraiassignment.onrender.com)
+
 ---
 
 ## Table of Contents
@@ -221,6 +223,14 @@ Full endpoint reference, request/response shapes, and error format: see
   aggregation pipeline, shared by the transaction list, every analytics
   endpoint, and CSV export — so numbers on the dashboard, rows in the table,
   and rows in the exported CSV are always in sync with the active filters.
+- **Paid-only financial totals.** The summary cards (Balance, Revenue,
+  Expenses, Savings) and the Overview trend chart both count only
+  transactions with `status: "Paid"` — Pending transactions are deliberately
+  excluded so the headline figures reflect money that has actually settled,
+  not money that might never be collected. Pending amounts aren't hidden;
+  they're surfaced separately (`pendingRevenue` / `pendingExpenses` in the
+  summary API response, and the Paid/Pending split in the Category
+  Breakdown chart) rather than blended into the same total.
 - **Stateless JWT auth.** No server-side session store; `/auth/logout` exists
   for a clean UX but the client is responsible for discarding the token.
 - **CSV export hardening.** Beyond formula-injection protection (cells
