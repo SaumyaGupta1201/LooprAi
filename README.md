@@ -6,6 +6,8 @@ and a configurable CSV export pipeline.
 
 Built for the Loopr AI full-stack technical assignment.
 
+**Live Demo:** [https://loopraiassignment.onrender.com](https://loopraiassignment.onrender.com)
+
 ---
 
 ## Table of Contents
