@@ -1,6 +1,11 @@
 # Penta — API Documentation
 
-Base URL: `http://localhost:5000/api`
+| Environment | Base URL |
+|-------------|----------|
+| Production  | `https://looprai-lun1.onrender.com/api` |
+| Local       | `http://localhost:5000/api` |
+
+> The production server runs on Render's free tier, so the first request after a period of inactivity can take 30-60 seconds while it wakes up.
 
 All endpoints except `POST /auth/login` require an `Authorization` header:
 ```
@@ -136,7 +141,7 @@ Paginated, filtered, sorted, and searchable transaction list.
 **Example**
 
 ```
-GET /api/transactions?page=1&limit=10&sortBy=date&order=desc&category=Revenue&status=Paid
+GET /transactions?page=1&limit=10&sortBy=date&order=desc&category=Revenue&status=Paid
 ```
 
 **Response `200`**
@@ -234,7 +239,7 @@ intervals. Powers the Overview chart's period toggle.
 
 **Example**
 
-GET /api/analytics/trend?period=weekly&category=Revenue
+GET /analytics/trend?period=weekly&category=Revenue
 
 
 **Response `200`**

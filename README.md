@@ -6,12 +6,11 @@ and a configurable CSV export pipeline.
 
 Built for the Loopr AI full-stack technical assignment.
 
-**Live Demo:** [https://loopraiassignment.onrender.com](https://loopraiassignment.onrender.com)
-
 ---
 
 ## Table of Contents
 
+- [Live Links](#live-links)
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -30,6 +29,20 @@ Built for the Loopr AI full-stack technical assignment.
 - [Known Limitations](#known-limitations)
 
 ---
+
+## Live Links
+
+| Resource | Link |
+|----------|------|
+| App | https://loopraiassignment.onrender.com |
+| API | https://looprai-lun1.onrender.com/api |
+| Postman docs | https://documenter.getpostman.com/view/50621559/2sBYB1NoR4 |
+| API docs | [`API_DOCS.md`](./API_DOCS.md) |
+| Postman collection | [`postman/Postman_Collection_Link.json`](./postman/Postman_Collection_Link.json) |
+
+> Both services run on Render's free tier, so the first request after inactivity can take 30-60 seconds while they wake up.
+
+**Postman:** import the JSON file, then send `login` first. Its script stores the token, and the other requests use it automatically.
 
 ## Overview
 
@@ -69,7 +82,7 @@ graph LR
 ## Project Structure
 
 ```
-loopr-finance/
+LooprAi/
 ├── backend/
 │ ├── src/
 │ │ ├── config/ # DB connection
@@ -107,8 +120,8 @@ loopr-finance/
 ### 1. Clone & Install
 
 ```bash
-git clone <repository-url>
-cd loopr-finance
+git clone https://github.com/SaumyaGupta1201/LooprAi.git
+cd LooprAi
 
 cd backend && npm install
 cd ../frontend && npm install
@@ -133,6 +146,7 @@ Create `frontend/.env`:
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
+> **Production:** set `CLIENT_ORIGIN=https://loopraiassignment.onrender.com` on the backend service and `VITE_API_URL=https://looprai-lun1.onrender.com/api` on the frontend service. Redeploy the frontend after changing it, since Vite reads it at build time.
 
 > `DEMO_EMAIL` / `DEMO_PASSWORD` are only used by the seed script to create the
 > initial login account — change them to whatever you like before seeding.
